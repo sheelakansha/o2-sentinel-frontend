@@ -1,6 +1,26 @@
-import React from 'react';
 
-export default function PredictionChart({ title, history = [], projection = [], min = 0, max = 100, color = '#007aff', unit = '%', summaryText }) {
+
+interface PredictionChartProps {
+  title: string;
+  history: number[];
+  projection: number[];
+  min?: number;
+  max?: number;
+  color?: string;
+  unit?: string;
+  summaryText?: string;
+}
+
+export default function PredictionChart({ 
+  title, 
+  history = [], 
+  projection = [], 
+  min = 0, 
+  max = 100, 
+  color = 'var(--drdo-cyan)', 
+  unit = '%', 
+  summaryText 
+}: PredictionChartProps) {
   const width = 500;
   const height = 125;
   const paddingLeft = 38;
@@ -12,7 +32,7 @@ export default function PredictionChart({ title, history = [], projection = [], 
   if (totalPoints < 2) return null;
 
   // Calculate coordinates for history and projection series
-  const getCoordinates = (series, startIndex) => {
+  const getCoordinates = (series: number[], startIndex: number) => {
     return series.map((val, idx) => {
       const globalIdx = startIndex + idx;
       const x = paddingLeft + (globalIdx / (totalPoints - 1)) * (width - paddingLeft - paddingRight);
@@ -29,7 +49,7 @@ export default function PredictionChart({ title, history = [], projection = [], 
   const projectionCoords = getCoordinates(projection, history.length - 1);
 
   // Helper to generate SVG path string
-  const getPathString = (coords) => {
+  const getPathString = (coords: { x: number; y: number }[]) => {
     if (coords.length === 0) return '';
     return coords.reduce((path, coord, idx) => {
       return idx === 0 ? `M ${coord.x} ${coord.y}` : `${path} L ${coord.x} ${coord.y}`;
@@ -42,8 +62,8 @@ export default function PredictionChart({ title, history = [], projection = [], 
   // Generate Confidence Interval shaded region coordinates (funnel expanding towards the future)
   const getConfidenceAreaPath = () => {
     if (projectionCoords.length === 0) return '';
-    const upperPoints = [];
-    const lowerPoints = [];
+    const upperPoints: { x: number; y: number }[] = [];
+    const lowerPoints: { x: number; y: number }[] = [];
     
     projectionCoords.forEach((coord, idx) => {
       const factor = idx / (projectionCoords.length - 1);
@@ -82,28 +102,29 @@ export default function PredictionChart({ title, history = [], projection = [], 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ 
             fontSize: '0.72rem', 
-            fontWeight: 600, 
-            color: 'var(--ios-label-tertiary)', 
+            fontWeight: 700, 
+            color: 'var(--drdo-text-secondary)', 
             textTransform: 'uppercase', 
-            letterSpacing: '0.04em' 
+            letterSpacing: '0.08em' 
           }}>
             {title}
           </span>
           <span style={{ 
             fontSize: '0.68rem', 
-            color: '#ffffff', 
-            background: 'var(--ios-system-blue)',
-            padding: '3px 10px',
-            borderRadius: '100px',
-            fontWeight: 600,
-            letterSpacing: '-0.01em',
-            boxShadow: '0 2px 6px rgba(10, 132, 255, 0.25)'
+            color: '#070c15', 
+            background: 'var(--drdo-cyan)',
+            padding: '2px 10px',
+            borderRadius: '2px',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            boxShadow: '0 2px 8px rgba(0, 240, 255, 0.25)'
           }}>
-            Forecast Analysis
+            DEBEL Forecast Model
           </span>
         </div>
         {summaryText && (
-          <div style={{ fontSize: '0.74rem', color: 'var(--ios-label-secondary)', fontWeight: 500 }}>
+          <div style={{ fontSize: '0.74rem', color: 'var(--drdo-text-secondary)', fontWeight: 500 }}>
             {summaryText}
           </div>
         )}
@@ -114,11 +135,11 @@ export default function PredictionChart({ title, history = [], projection = [], 
         <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" style={{ overflow: 'visible' }}>
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor={color} stopOpacity="0.8" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.7" />
               <stop offset="100%" stopColor={color} stopOpacity="1" />
             </linearGradient>
             <linearGradient id={areaGradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.18" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.15" />
               <stop offset="100%" stopColor={color} stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -133,7 +154,7 @@ export default function PredictionChart({ title, history = [], projection = [], 
                 y1={y} 
                 x2={width - paddingRight} 
                 y2={y} 
-                stroke="var(--ios-grid-line)" 
+                stroke="var(--drdo-grid-line)" 
                 strokeWidth="0.8" 
                 strokeDasharray="4,4"
               />
@@ -146,18 +167,18 @@ export default function PredictionChart({ title, history = [], projection = [], 
             y1={paddingTop - 4} 
             x2={paddingLeft} 
             y2={height - paddingBottom} 
-            stroke="var(--ios-separator)" 
+            stroke="var(--drdo-separator)" 
             strokeWidth="1" 
           />
 
           {/* Y-Axis Labels */}
-          <text x={paddingLeft - 8} y={paddingTop + 3} fill="var(--ios-label-tertiary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={paddingLeft - 8} y={paddingTop + 3} fill="var(--drdo-text-tertiary)" fontSize="8" fontWeight="700" fontFamily="var(--font-digital)" textAnchor="end">
             {max}{unit}
           </text>
-          <text x={paddingLeft - 8} y={(paddingTop + height - paddingBottom) / 2 + 3} fill="var(--ios-label-tertiary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={paddingLeft - 8} y={(paddingTop + height - paddingBottom) / 2 + 3} fill="var(--drdo-text-tertiary)" fontSize="8" fontWeight="700" fontFamily="var(--font-digital)" textAnchor="end">
             {((max + min) / 2).toFixed(0)}{unit}
           </text>
-          <text x={paddingLeft - 8} y={height - paddingBottom + 3} fill="var(--ios-label-tertiary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={paddingLeft - 8} y={height - paddingBottom + 3} fill="var(--drdo-text-tertiary)" fontSize="8" fontWeight="700" fontFamily="var(--font-digital)" textAnchor="end">
             {min}{unit}
           </text>
 
@@ -166,8 +187,8 @@ export default function PredictionChart({ title, history = [], projection = [], 
             <path 
               d={confidencePath} 
               fill={color} 
-              opacity="0.06" 
-              stroke="var(--ios-separator)" 
+              opacity="0.05" 
+              stroke="var(--drdo-separator)" 
               strokeWidth="0.5" 
               strokeDasharray="2,2" 
             />
@@ -187,9 +208,10 @@ export default function PredictionChart({ title, history = [], projection = [], 
               d={historyPath} 
               fill="none" 
               stroke={`url(#${gradId})`} 
-              strokeWidth="2.2" 
+              strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round" 
+              filter={`drop-shadow(0 0 3px ${color}40)`}
             />
           )}
 
@@ -199,11 +221,11 @@ export default function PredictionChart({ title, history = [], projection = [], 
               d={projectionPath} 
               fill="none" 
               stroke={color} 
-              strokeWidth="2" 
+              strokeWidth="1.8" 
               strokeLinecap="round" 
               strokeLinejoin="round" 
-              strokeDasharray="5,5"
-              opacity="0.85"
+              strokeDasharray="4,4"
+              opacity="0.8"
             />
           )}
 
@@ -213,16 +235,16 @@ export default function PredictionChart({ title, history = [], projection = [], 
             y1={paddingTop - 4} 
             x2={nowX} 
             y2={height - paddingBottom} 
-            stroke="var(--ios-label-tertiary)" 
-            strokeWidth="1.5" 
+            stroke="var(--drdo-text-tertiary)" 
+            strokeWidth="1.2" 
             strokeDasharray="3,3"
           />
 
           {/* Labels inside graph */}
-          <text x={nowX - 6} y={height - paddingBottom - 8} fill="var(--ios-label-secondary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={nowX - 6} y={height - paddingBottom - 8} fill="var(--drdo-text-secondary)" fontSize="8" fontWeight="700" textAnchor="end">
             NOW
           </text>
-          <text x={width - paddingRight} y={height - paddingBottom - 8} fill="var(--ios-label-tertiary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={width - paddingRight} y={height - paddingBottom - 8} fill="var(--drdo-text-tertiary)" fontSize="8" fontWeight="700" textAnchor="end">
             +60 MIN
           </text>
 
@@ -231,7 +253,7 @@ export default function PredictionChart({ title, history = [], projection = [], 
             <circle 
               cx={nowX} 
               cy={historyCoords[historyCoords.length - 1].y} 
-              r="4.5" 
+              r="4" 
               fill="#ffffff" 
               stroke={color} 
               strokeWidth="2"
@@ -243,7 +265,7 @@ export default function PredictionChart({ title, history = [], projection = [], 
             <circle 
               cx={projectionCoords[projectionCoords.length - 1].x} 
               cy={projectionCoords[projectionCoords.length - 1].y} 
-              r="3.5" 
+              r="3" 
               fill={color} 
               stroke="#ffffff" 
               strokeWidth="1"
@@ -253,9 +275,9 @@ export default function PredictionChart({ title, history = [], projection = [], 
       </div>
 
       {/* Footer Scale Details */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', color: 'var(--ios-label-tertiary)', fontWeight: 500 }}>
-        <span>Past 15m (Actual)</span>
-        <span>Future 60m (Confidence Range: ±0.5%)</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', color: 'var(--drdo-text-tertiary)', fontWeight: 600 }}>
+        <span>PAST 15M (ACTUAL)</span>
+        <span>FUTURE 60M (CONFIDENCE MARGIN: ±0.5%)</span>
       </div>
     </div>
   );

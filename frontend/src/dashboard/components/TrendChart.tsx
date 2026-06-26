@@ -1,6 +1,30 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
-export default function TrendChart({ title, subtitle, data = [], min = 0, max = 100, color = '#007aff', unit = '', currentValue, safeMin, safeMax }) {
+interface TrendChartProps {
+  title: string;
+  subtitle?: string;
+  data: number[];
+  min?: number;
+  max?: number;
+  color?: string;
+  unit?: string;
+  currentValue?: string;
+  safeMin?: number;
+  safeMax?: number;
+}
+
+export default function TrendChart({ 
+  title, 
+  subtitle, 
+  data = [], 
+  min = 0, 
+  max = 100, 
+  color = 'var(--drdo-cyan)', 
+  unit = '', 
+  currentValue, 
+  safeMin, 
+  safeMax 
+}: TrendChartProps) {
   const [timeRange, setTimeRange] = useState('24h');
   
   const width = 500;
@@ -91,15 +115,15 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ 
             fontSize: '0.72rem', 
-            fontWeight: 600, 
-            color: 'var(--ios-label-tertiary)', 
+            fontWeight: 700, 
+            color: 'var(--drdo-text-secondary)', 
             textTransform: 'uppercase', 
-            letterSpacing: '0.04em' 
+            letterSpacing: '0.08em' 
           }}>
             {title}
           </span>
           {subtitle && (
-            <span style={{ fontSize: '0.62rem', color: 'var(--ios-label-tertiary)', marginTop: '2px' }}>
+            <span style={{ fontSize: '0.62rem', color: 'var(--drdo-text-tertiary)', marginTop: '2px', fontWeight: 500 }}>
               {subtitle}
             </span>
           )}
@@ -107,7 +131,7 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* Time Range Selector */}
-          <div className="ios-segmented-control" style={{ padding: '1.5px', borderRadius: '6px' }}>
+          <div className="ios-segmented-control" style={{ padding: '1.5px', borderRadius: '4px' }}>
             {['1h', '6h', '24h'].map(range => (
               <button
                 key={range}
@@ -116,7 +140,7 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
                 style={{
                   padding: '2px 8px',
                   fontSize: '0.68rem',
-                  borderRadius: '4px'
+                  borderRadius: '3px'
                 }}
               >
                 {range}
@@ -126,10 +150,16 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
 
           {/* Current Reading */}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '1px' }}>
-            <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--ios-label-primary)' }}>
+            <span style={{ 
+              fontSize: '1.3rem', 
+              fontWeight: 700, 
+              color: 'var(--drdo-text-primary)',
+              fontFamily: 'var(--font-digital)',
+              textShadow: `0 0 10px ${color}30`
+            }}>
               {currentValue !== undefined ? currentValue : (displayData[displayData.length - 1]?.toFixed(1) || '--')}
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--ios-label-secondary)', fontWeight: 500 }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--drdo-text-secondary)', fontWeight: 600, marginLeft: '2px' }}>
               {unit}
             </span>
           </div>
@@ -141,12 +171,12 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
         <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" style={{ overflow: 'visible' }}>
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor={color} stopOpacity="0.7" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.6" />
               <stop offset="100%" stopColor={color} stopOpacity="1" />
             </linearGradient>
             
             <linearGradient id={areaGradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.20" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.15" />
               <stop offset="100%" stopColor={color} stopOpacity="0.00" />
             </linearGradient>
           </defs>
@@ -158,8 +188,8 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
               y={safeZoneRect.y} 
               width={width - paddingLeft - paddingRight} 
               height={safeZoneRect.height} 
-              fill="var(--ios-system-blue)" 
-              opacity="0.04" 
+              fill={color} 
+              opacity="0.03" 
             />
           )}
 
@@ -171,7 +201,7 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
               y1={y} 
               x2={width - paddingRight} 
               y2={y} 
-              stroke="var(--ios-grid-line)" 
+              stroke="var(--drdo-grid-line)" 
               strokeWidth="0.8" 
               strokeDasharray="4,4"
             />
@@ -183,18 +213,18 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
             y1={paddingTop - 4} 
             x2={paddingLeft} 
             y2={height - paddingBottom} 
-            stroke="var(--ios-separator)" 
+            stroke="var(--drdo-separator)" 
             strokeWidth="1" 
           />
 
           {/* Y-Axis Labels */}
-          <text x={paddingLeft - 8} y={paddingTop + 3} fill="var(--ios-label-tertiary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={paddingLeft - 8} y={paddingTop + 3} fill="var(--drdo-text-tertiary)" fontSize="8" fontWeight="700" fontFamily="var(--font-digital)" textAnchor="end">
             {max}{unit}
           </text>
-          <text x={paddingLeft - 8} y={(paddingTop + height - paddingBottom) / 2 + 3} fill="var(--ios-label-tertiary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={paddingLeft - 8} y={(paddingTop + height - paddingBottom) / 2 + 3} fill="var(--drdo-text-tertiary)" fontSize="8" fontWeight="700" fontFamily="var(--font-digital)" textAnchor="end">
             {((max + min) / 2).toFixed(0)}{unit}
           </text>
-          <text x={paddingLeft - 8} y={height - paddingBottom + 3} fill="var(--ios-label-tertiary)" fontSize="8" fontWeight="600" textAnchor="end">
+          <text x={paddingLeft - 8} y={height - paddingBottom + 3} fill="var(--drdo-text-tertiary)" fontSize="8" fontWeight="700" fontFamily="var(--font-digital)" textAnchor="end">
             {min}{unit}
           </text>
 
@@ -209,9 +239,10 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
               d={linePath} 
               fill="none" 
               stroke={`url(#${gradId})`} 
-              strokeWidth="2.2" 
+              strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round" 
+              filter={`drop-shadow(0 0 3px ${color}50)`}
             />
           )}
 
@@ -227,21 +258,21 @@ export default function TrendChart({ title, subtitle, data = [], min = 0, max = 
               >
                 <animate 
                   attributeName="r" 
-                  values="4;10;4" 
-                  dur="2.2s" 
+                  values="4;9;4" 
+                  dur="2s" 
                   repeatCount="indefinite" 
                 />
                 <animate 
                   attributeName="opacity" 
-                  values="0.6;0;0.6" 
-                  dur="2.2s" 
+                  values="0.5;0;0.5" 
+                  dur="2s" 
                   repeatCount="indefinite" 
                 />
               </circle>
               <circle 
                 cx={latestCoord.x} 
                 cy={latestCoord.y} 
-                r="3.5" 
+                r="3" 
                 fill={color} 
                 stroke="#ffffff" 
                 strokeWidth="1"

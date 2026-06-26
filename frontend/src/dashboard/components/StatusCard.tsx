@@ -1,23 +1,46 @@
 import React from 'react';
 
-export default function StatusCard({ title, value, unit, status = 'normal', icon, subtitle, progress, helperText }) {
+interface StatusCardProps {
+  title: string;
+  value: string;
+  unit?: string;
+  status?: 'normal' | 'warning' | 'danger';
+  icon?: React.ReactNode;
+  subtitle?: string;
+  progress?: number;
+  helperText?: string;
+}
+
+export default function StatusCard({ 
+  title, 
+  value, 
+  unit, 
+  status = 'normal', 
+  icon, 
+  subtitle, 
+  progress, 
+  helperText 
+}: StatusCardProps) {
   // Determine color theme based on status
   const getStatusColor = () => {
     switch (status) {
-      case 'normal': return 'var(--ios-system-blue)';
-      case 'warning': return 'var(--ios-system-orange)';
-      case 'danger': return 'var(--ios-system-red)';
-      default: return 'var(--ios-system-gray)';
+      case 'normal': return 'var(--drdo-cyan)';
+      case 'warning': return 'var(--drdo-orange)';
+      case 'danger': return 'var(--drdo-red)';
+      default: return 'var(--drdo-gray)';
     }
   };
 
   const isSafetyCard = title === 'Overall Safety';
+  
+  // Custom glowing properties
   const glowShadow = status === 'normal'
-    ? '0 0 20px rgba(10, 132, 255, 0.3)' // Safe blue glow
-    : '0 0 20px rgba(255, 69, 58, 0.4)'; // Alert red glow
-  const glowBorder = status === 'normal'
-    ? 'rgba(10, 132, 255, 0.45)'
-    : 'rgba(255, 69, 58, 0.55)';
+    ? '0 4px 20px rgba(0, 240, 255, 0.15), inset 0 0 12px rgba(0, 240, 255, 0.03)'
+    : status === 'warning'
+      ? '0 4px 20px rgba(255, 145, 0, 0.15), inset 0 0 12px rgba(255, 145, 0, 0.03)'
+      : '0 4px 20px rgba(255, 61, 0, 0.2), inset 0 0 12px rgba(255, 61, 0, 0.05)';
+
+  const accentColor = getStatusColor();
 
   return (
     <div className="ios-blur-card" style={{
@@ -26,29 +49,27 @@ export default function StatusCard({ title, value, unit, status = 'normal', icon
       justifyContent: 'space-between',
       minHeight: '140px',
       gap: '12px',
-      transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
-      borderColor: isSafetyCard ? glowBorder : (status !== 'normal' ? getStatusColor() : 'var(--ios-separator)'),
-      borderWidth: '1px',
-      boxShadow: isSafetyCard 
-        ? glowShadow 
-        : (status !== 'normal' ? `0 4px 20px ${getStatusColor()}15` : '0 8px 24px rgba(0, 0, 0, 0.25)')
+      borderLeft: `4px solid ${accentColor}`,
+      borderColor: isSafetyCard || status !== 'normal' ? accentColor : 'var(--drdo-border)',
+      boxShadow: glowShadow
     }}>
       {/* Card Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <span style={{ 
           fontSize: '0.72rem', 
-          fontWeight: 600, 
-          color: 'var(--ios-label-tertiary)', 
+          fontWeight: 700, 
+          color: 'var(--drdo-text-secondary)', 
           textTransform: 'uppercase', 
-          letterSpacing: '0.04em' 
+          letterSpacing: '0.08em' 
         }}>
           {title}
         </span>
         <div style={{
-          color: getStatusColor(),
+          color: accentColor,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          filter: `drop-shadow(0 0 4px ${accentColor}40)`
         }}>
           {icon}
         </div>
@@ -61,16 +82,19 @@ export default function StatusCard({ title, value, unit, status = 'normal', icon
             fontSize: '2.2rem', 
             fontWeight: 700, 
             letterSpacing: '-0.02em', 
-            color: 'var(--ios-label-primary)',
-            lineHeight: '1'
+            color: 'var(--drdo-text-primary)',
+            fontFamily: 'var(--font-digital)',
+            lineHeight: '1',
+            textShadow: `0 0 15px ${accentColor}25`
           }}>
             {value}
           </span>
           {unit && (
             <span style={{ 
               fontSize: '1rem', 
-              fontWeight: 500, 
-              color: 'var(--ios-label-secondary)' 
+              fontWeight: 600, 
+              color: 'var(--drdo-text-secondary)',
+              marginLeft: '2px'
             }}>
               {unit}
             </span>
@@ -79,7 +103,7 @@ export default function StatusCard({ title, value, unit, status = 'normal', icon
         {helperText && (
           <div style={{ 
             fontSize: '0.72rem', 
-            color: 'var(--ios-label-tertiary)',
+            color: 'var(--drdo-text-tertiary)',
             fontWeight: 500
           }}>
             {helperText}
@@ -92,30 +116,31 @@ export default function StatusCard({ title, value, unit, status = 'normal', icon
         {progress !== undefined ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{ 
-              height: '8px', 
+              height: '4px', 
               width: '100%', 
-              background: 'rgba(255, 255, 255, 0.08)', 
-              borderRadius: '4px',
+              background: 'rgba(255, 255, 255, 0.05)', 
+              borderRadius: '2px',
               overflow: 'hidden'
             }}>
               <div style={{ 
                 height: '100%', 
                 width: `${Math.min(100, Math.max(0, progress))}%`, 
-                background: getStatusColor(),
-                borderRadius: '4px',
+                background: accentColor,
+                boxShadow: `0 0 8px ${accentColor}`,
+                borderRadius: '2px',
                 transition: 'width 0.5s ease-in-out'
               }} />
             </div>
             {subtitle && (
-              <span style={{ fontSize: '0.72rem', color: 'var(--ios-label-secondary)' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--drdo-text-secondary)', letterSpacing: '0.01em' }}>
                 {subtitle}
               </span>
             )}
           </div>
         ) : (
           subtitle && (
-            <span style={{ fontSize: '0.72rem', color: 'var(--ios-label-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span className="beacon-dot" style={{ width: '4px', height: '4px', '--status-color': getStatusColor() }} />
+            <span style={{ fontSize: '0.7rem', color: 'var(--drdo-text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span className="beacon-dot" style={{ width: '5px', height: '5px', '--status-color': accentColor } as React.CSSProperties} />
               {subtitle}
             </span>
           )
